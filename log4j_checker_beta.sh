@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# source https://github.com/rubo77/log4j_checker_beta
+# original source https://github.com/rubo77/log4j_checker_beta
 
 # needs locate to be installed, be sure to be up-to-date with
 # sudo updatedb
@@ -15,7 +15,7 @@ export LANG=
 RED=""; GREEN=""; YELLOW=""; ENDCOLOR=""
 
 function warning() {
-  printf "${RED}[WARNING] %s${ENDCOLOR}\n" "$1" >&2
+  printf "${RED}[echo] %s${ENDCOLOR}\n" "$1" >&2
 }
 
 function information() {
@@ -51,7 +51,7 @@ function find_jar_files() {
 }
 
 if [ $USER != root ]; then
-  warning "You have no root-rights. Not all files will be found."
+  echo "You have no root-rights. Not all files will be found."
 fi
 
 # Set this if you have a download for sha256 hashes
@@ -67,63 +67,63 @@ fi
 if [[ $? = 0 && -s "$file_temp_hashes.in" ]]; then
         cat "$file_temp_hashes.in" | cut -d" " -f1 | sort | uniq  > "$file_temp_hashes"
         ok_hashes=1
-        information "Downloaded vulnerable hashes from ..."
+        echo "Downloaded vulnerable hashes from ..."
 fi
 
-information "Looking for files containing log4j..."
+echo "Looking for files containing log4j..."
 if [ "$(command -v locate)" ]; then
-  information "using locate, which could be using outdated data. besure to have called updatedb recently"
+  echo "using locate, which could be using outdated data. besure to have called updatedb recently"
 fi
 OUTPUT="$(locate_log4j | grep -iv log4js | grep -v log4j_checker_beta)"
 if [ "$OUTPUT" ]; then
-  warning "Maybe vulnerable, those files contain the name:"
+  echo "Maybe vulnerable, those files contain the name:"
   printf "%s\n" "$OUTPUT"
 else
-  ok "No files containing log4j"
+  echo "No files containing log4j"
 fi
 
-information "Checking installed packages Solr ElasticSearch and packages containing log4j"
+echo "Checking installed packages Solr ElasticSearch and packages containing log4j"
 if [ "$(command -v yum)" ]; then
   # using yum
   OUTPUT="$(yum list installed | grep -i $PACKAGES | grep -iv log4js)"
   if [ "$OUTPUT" ]; then
-    warning "Maybe vulnerable, yum installed packages:"
+    echo "Maybe vulnerable, yum installed packages:"
     printf "%s\n" "$OUTPUT"
   else
-    ok "No yum packages found"
+    echo "No yum packages found"
   fi
 fi
 if [ "$(command -v dpkg)" ]; then
   # using dpkg
   OUTPUT="$(dpkg -l | grep -i $PACKAGES | grep -iv log4js)"
   if [ "$OUTPUT" ]; then
-    warning "Maybe vulnerable, dpkg installed packages:"
+    echo "Maybe vulnerable, dpkg installed packages:"
     printf "%s\n" "$OUTPUT"
   else
-    ok "No dpkg packages found"
+    echo "No dpkg packages found"
   fi
 fi
 
-information "Checking if Java is installed..."
+echo "Checking if Java is installed..."
 JAVA="$(command -v java)"
 if [ "$JAVA" ]; then
-  warning "Java is installed"
+  echo "Java is installed"
   printf "     %s\n     %s\n" \
     "Java applications often bundle their libraries inside binary files," \
     "so there could be log4j in such applications."
 else
-  ok "Java is not installed"
+  echo "Java is not installed"
 fi
 
-information "Analyzing JAR/WAR/EAR files..."
+echo "Analyzing JAR/WAR/EAR files..."
 if [ $ok_hashes ]; then
-  information "Also checking hashes"
+  echo "Also checking hashes"
 fi
 if [ "$(command -v unzip)" ]; then
   find_jar_files | while read -r jar_file; do
     unzip -l "$jar_file" 2> /dev/null \
       | grep -q -i "log4j" \
-      && warning "$jar_file contains log4j files"
+      && echo "$jar_file contains log4j files"
     if [ $ok_hashes ]; then
       dir_unzip=$(mktemp -d)
       base_name=$(basename "$jar_file")
@@ -132,22 +132,22 @@ if [ "$(command -v unzip)" ]; then
         | cut -d" " -f1 | sort | uniq > "$dir_unzip/$base_name.hashes";
       num_found=$(comm -12 "$file_temp_hashes" "$dir_unzip/$base_name.hashes" | wc -l)
       if [[ -n $num_found && $num_found != 0 ]]; then
-        warning "$jar_file contains vulnerable binary classes"
+        echo "$jar_file contains vulnerable binary classes"
       else
-        ok "No .class files with known vulnerable hash found in $jar_file at first level."
+        echo "No .class files with known vulnerable hash found in $jar_file at first level."
       fi
       rm -rf -- "$dir_unzip"
     fi
   done
 else
-  information "Cannot look for log4j inside JAR/WAR/EAR files (unzip not found)"
+  echo "Cannot look for log4j inside JAR/WAR/EAR files (unzip not found)"
 fi
 [ $ok_hashes ] && rm -rf -- "$dir_temp_hashes"
 
-information "_________________________________________________"
+echo "_________________________________________________"
 if [ "$JAVA" == "" ]; then
-  warning "Some apps bundle the vulnerable library in their own compiled package, so 'java' might not be installed but one such apps could still be vulnerable."
+  echo "Some apps bundle the vulnerable library in their own compiled package, so 'java' might not be installed but one such apps could still be vulnerable."
 fi
 echo
-warning "This whole script is not 100% proof you are not vulnerable, but a strong hint"
+echo "This whole script is not 100% proof you are not vulnerable, but a strong hint"
 echo
