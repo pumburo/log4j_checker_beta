@@ -148,6 +148,4 @@ echo "_________________________________________________"
 if [ "$JAVA" == "" ]; then
   echo "Some apps bundle the vulnerable library in their own compiled package, so 'java' might not be installed but one such apps could still be vulnerable."
 fi
-echo
-echo "This whole script is not 100% proof you are not vulnerable, but a strong hint"
-echo
+
