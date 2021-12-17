@@ -10,12 +10,16 @@ PACKAGES='solr\|elastic\|log4j'
 
 export LANG=
 
+folders=$(ls -d /*/ | egrep -v 'proc|boot|sys|dev')
+
+echo "Folders to scan ${folders}"
+
 function locate_log4j() {
   if [ "$(command -v locate)" ]; then
     locate log4j
   else
     find \
-      /var /etc /usr /opt /lib* \
+      $folders \
       -name "*log4j*" \
       2>&1 \
       | grep -v '^find:.* Permission denied$' \
@@ -25,7 +29,7 @@ function locate_log4j() {
 
 function find_jar_files() {
   find \
-    /var /etc /usr /opt /lib* \
+    $folders \
     -name "*.jar" \
     -o -name "*.war" \
     -o -name "*.ear" \
@@ -37,6 +41,8 @@ function find_jar_files() {
 if [ $USER != root ]; then
   echo "You have no root-rights. Not all files will be found."
 fi
+
+
 
 # Set this if you have a download for sha256 hashes
 download_file=""
