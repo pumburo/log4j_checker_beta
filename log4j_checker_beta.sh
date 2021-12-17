@@ -12,7 +12,7 @@ export LANG=
 
 folders=$(ls -d /*/ | egrep -v 'proc|boot|sys|dev')
 
-echo "Folders to scan ${folders}"
+echo "Folders to scan" $folders
 
 function locate_log4j() {
   if [ "$(command -v locate)" ]; then
