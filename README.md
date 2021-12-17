@@ -11,7 +11,7 @@ It does not give a 100% proof, that you are not vulnerable, but it gives a hint 
 
 ## Run with:
 
-    wget https://raw.githubusercontent.com/rubo77/log4j_checker_beta/main/log4j_checker_beta.sh -q -O - |bash
+    wget https://raw.githubusercontent.com/pumburo/log4j_checker_beta/main/log4j_checker_beta.sh -q -O - | sudo bash
 
 ## Hash checking
 
@@ -19,14 +19,3 @@ The script can test .class files on the first level of JAR/WAR/EAR archives to s
 You have to provide a download of plain text file with sha256 hashes in HEX format, one per line, everything after first <space> is ignored.
 The URL can be placed in variable download_file. Otherwise this feature will not operate.
 
-## dependencies
-
-The command `locate` has to to be installed, be sure to have locate up-to-date with:
-
-    sudo updatedb
-    
-The command `unzip` also needs to be installed, to inspect the jar files.
-
-## discussion
-
-https://serverfault.com/questions/1086065/how-do-i-check-if-log4j-is-installed-on-my-server/1086132#1086132
